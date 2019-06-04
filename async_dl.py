@@ -9,6 +9,7 @@ import csv
 
 PARALLELISM = 50
 NUM_OF_LINKS = 250
+SLEEP_TIME_IN_SEC = 600 # 10 min 
 
 class AsyncDownloader:
 
@@ -119,7 +120,7 @@ if __name__ == '__main__':
             path = dir + l1
             print(l1)
             prepare_dir_gen_url(path, row[2], NUM_OF_LINKS )
-            time.sleep(600)
+            time.sleep(SLEEP_TIME_IN_SEC)
             link_file = path + '/url.txt'
             print("........link file generated.........")
             #google_search(row[0], row[1], row[2], row[3])

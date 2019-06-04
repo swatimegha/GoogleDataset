@@ -109,7 +109,7 @@ def prepare_dir_gen_url(path, sk, num):
 
 if __name__ == '__main__':
     # TODO: reading of labels from csv file can be added
-    dir = 'output'
+    dir = 'output/'
     with open('cats.csv','rt')as f:
         data = csv.reader(f)
         for row in data:

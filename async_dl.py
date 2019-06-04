@@ -9,7 +9,7 @@ import csv
 
 PARALLELISM = 50
 NUM_OF_LINKS = 250
-SLEEP_TIME_IN_SEC = 300 # 5 min 
+SLEEP_TIME_IN_SEC = 240 # 4 min 
 
 class AsyncDownloader:
 
@@ -73,24 +73,21 @@ class AsyncDownloader:
         except IOError:
             print("Error of writing files")
 
-
-
-
 def prepare_dir_gen_url(path, sk, num):
     if os.path.exists(path):
         print("Path exist")
     else:
         os.makedirs(path)
-        print("dir created")
-    u = path + '/' + 'url.txt'
-    ua=path + '/' + 'urlAppend.txt'
+        print("Dir created")
+    u = path + '/' + sk + '.txt'
+    ua = path + '/' + '_URLS' + '.txt'
     try:
         from googlesearch import search
     except ImportError:
         print("No module named 'google' found")
 
     try:
-        with open(ua,'a+', encoding="utf-8") as fa:
+        with open(ua, 'a+', encoding="utf-8") as fa:
             fa.write("........" + sk + "........")
             fa.write('\n')
     except IOError: \
@@ -98,7 +95,7 @@ def prepare_dir_gen_url(path, sk, num):
 
     for j in search(sk, tld="co.in", num=int(num), stop=int(num), pause=15):
         try:
-            with open(u,'a+', encoding="utf-8") as f, open(ua,'a+', encoding="utf-8") as fa:
+            with open(u, 'a+', encoding="utf-8") as f, open(ua, 'a+', encoding="utf-8") as fa:
                 f.write(j)
                 f.write('\n')
                 fa.write(j)
@@ -106,20 +103,18 @@ def prepare_dir_gen_url(path, sk, num):
         except IOError:
             print("Error of writing files")
 
-
-
 if __name__ == '__main__':
     # TODO: reading of labels from csv file can be added
-    dir = 'output/'
+    out_dir = 'output'
     with open('cats.csv','rt')as f:
         data = csv.reader(f)
         for row in data:
             print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:" + str(NUM_OF_LINKS))
             l1 = row[0].title().replace(" ", "")
             l2 = row[1].title().replace(" ", "")
-            path = dir + l1
+            path = out_dir + '/' + l1
             print(l1)
-            prepare_dir_gen_url(path, row[2], NUM_OF_LINKS )
+            prepare_dir_gen_url(path, row[2], NUM_OF_LINKS)
             time.sleep(SLEEP_TIME_IN_SEC)
             #link_file = path + '/url.txt'
             #print("........link file generated.........")

@@ -9,7 +9,7 @@ import csv
 
 PARALLELISM = 50
 NUM_OF_LINKS = 250
-SLEEP_TIME_IN_SEC = 600 # 10 min 
+SLEEP_TIME_IN_SEC = 300 # 5 min 
 
 class AsyncDownloader:
 
@@ -121,12 +121,12 @@ if __name__ == '__main__':
             print(l1)
             prepare_dir_gen_url(path, row[2], NUM_OF_LINKS )
             time.sleep(SLEEP_TIME_IN_SEC)
-            link_file = path + '/url.txt'
-            print("........link file generated.........")
+            #link_file = path + '/url.txt'
+            #print("........link file generated.........")
             #google_search(row[0], row[1], row[2], row[3])
             #google_search(link_file, "about ballet dance")
-            dl = AsyncDownloader(link_file, l1, l2, path)
-            asyncio.run(dl.main())
-            os.remove(link_file)
-            print("........link file removed.........")
+            #dl = AsyncDownloader(link_file, l1, l2, path)
+            #asyncio.run(dl.main())
+            #os.remove(link_file)
+            #print("........link file removed.........")
 

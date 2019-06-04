@@ -1,128 +1,57 @@
-import aiohttp
-import asyncio
+import csv
 from downloader import Downloader
 import re
 import os
-import ssl
-import csv
 
-PARALLELISM = 50
+def googleSearch(category1, category2):
+    try:
+        from googlesearch import search
+    except ImportError:
+        print("No module named 'google' found")
+    label1 = category1.title().replace(" ", "")
+    label2 = category2.title().replace(" ", "")
+    for j in search(category2, tld="co.in", num=200, stop=200, pause=2):
+        #print(j)
+        prepareTextFile(label1, label2, j)
 
-class AsyncDownloader:
-
-    def __init__(self, file, label1, label2, output):
-        with open(file, 'rt') as f:
-            self.urls = [x.strip() for x in f]
-            self.output_dir = output
-            self.label1 = label1
-            self.label2 = label2
-
-    async def fetch(self, session, url, sem):
-        try:
-            async with session.get(url) as response, sem:
-                if response.status != 200:
-                    response.raise_for_status()
-                return await response.text()
-        except:
-            return ""
-
-    async def fetch_all(self, session, sem):
-        results = await asyncio.gather(
-            *[asyncio.create_task(self.fetch(session, url, sem)) for url in self.urls]
-        )
-        return results
-
-    async def main(self):
-        sem = asyncio.Semaphore(PARALLELISM)
-        async with aiohttp.ClientSession() as session:
-            htmls = await self.fetch_all(session, sem)
-            for html in htmls:
-                try:
-                    art = Downloader.get_article("", html).text
-                    art = re.sub(' +', ' ', art.replace('\n',' '))
-                    self.save_to_file(art)
-                except:
-                    print("Cannot parse page")
-
-    # TODO: file tree hierarchy can be optimized/changed
-    def save_to_file(self, text):
-        if text.strip().startswith("<") or text.strip().startswith('{'):
-            return
-        path = self.output_dir + '/' + self.label1
-        if os.path.exists(path):
-            print("Path exist")
-        else:
-            os.makedirs(path)
-            print("Dir created")
-        f1 = path + '/' + self.label1 + '.txt'
-        f2 = path + '/' + self.label2 + '.txt'
-
-        try:
-            with \
-                    open(f1, 'a+', encoding="utf-8") as f1, \
-                    open(f2, 'a+', encoding="utf-8") as f2:
-
-                f1.write('\n__label__' + self.label1 + ' ')
-                f1.write(text)
-                f2.write('\n__label__' + self.label2 + ' ')
-                f2.write(text)
-
-        except IOError:
-            print("Error of writing files")
-
-
-
-
-def prepare_dir_gen_url(path, sk, num):
+def prepareTextFile(label1, label2, url):
+    dir = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
+    path = dir + label1
     if os.path.exists(path):
         print("Path exist")
     else:
         os.makedirs(path)
         print("dir created")
+    f1 = path + '\\' +label1 + '.txt'
+    f2 = path + '\\' +label2 + '.txt'
     u = path + '\\' + 'url.txt'
-    ua=path + '\\' + 'urlAppend.txt'
-    try:
-        from googlesearch import search
-    except ImportError:
-        print("No module named 'google' found")
+
+
+    #article = Downloader.download_article(url)
+   # article = Downloader.parse_article(article)
+    article = Downloader.get_article(url)
+    art = article.text
+    art = re.sub(' +', ' ', art.replace('\n',' '))
 
     try:
-        with open(ua,'a+', encoding="utf-8") as fa:
-            fa.write("........" + sk + "........")
-            fa.write('\n')
-    except IOError: \
-            print("Error of writing files")
+        with open(f1,'a+', encoding="utf-8") as f1, open (f2,'a+', encoding="utf-8") as f2, open(u,'a+', encoding="utf-8") as u:
 
-    for j in search(sk, tld="co.in", num=int(num), stop=int(num), pause=15):
-        try:
-            with open(u,'a+', encoding="utf-8") as f, open(ua,'a+', encoding="utf-8") as fa:
-                f.write(j)
-                f.write('\n')
-                fa.write(j)
-                fa.write('\n')
-        except IOError:
-            print("Error of writing files")
+            u.write(url)
+            u.write('\n')
+            f1.write('\n__label__' + label1 + ' ')
+            f1.write(art)
+            f2.write('\n__label__' + label2 + ' ')
+            f2.write(art)
+
+        # remove_empty_lines(file_storage+data_filename)
+        # print('records written:' + str(count))
+    except:
+        print("Error of parsing")
 
 
 
-if __name__ == '__main__':
-    # TODO: reading of labels from csv file can be added
-    dir = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
-    with open('D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\ibm-cat-list.csv','rt')as f:
-        data = csv.reader(f)
-        for row in data:
-            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:"+ row[3])
-            l1 = row[0].title().replace(" ", "")
-            l2 = row[1].title().replace(" ", "")
-            path = dir + l1
-            print(l1)
-            prepare_dir_gen_url(path, row[2], row[3] )
-            link_file = path + '\\url.txt'
-            print("........link file generated.........")
-            #google_search(row[0], row[1], row[2], row[3])
-            #google_search(link_file, "about ballet dance")
-            dl = AsyncDownloader(link_file, l1, l2, path)
-            asyncio.run(dl.main())
-            os.remove(link_file)
-            print("........link file removed.........")
-
+with open('D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\ibm-cat-list.csv','rt')as f:
+    data = csv.reader(f)
+    for row in data:
+        print("level 1: " + row[0] + "level 2: " +row[1])
+        googleSearch(row[0], row[1])

@@ -4,6 +4,7 @@ from downloader import Downloader
 import re
 import os
 import ssl
+import csv
 
 PARALLELISM = 50
 
@@ -70,26 +71,58 @@ class AsyncDownloader:
             print("Error of writing files")
 
 
-def google_search(link_file,  category2):
+
+
+def prepare_dir_gen_url(path, sk, num):
+    if os.path.exists(path):
+        print("Path exist")
+    else:
+        os.makedirs(path)
+        print("dir created")
+    u = path + '\\' + 'url.txt'
+    ua=path + '\\' + 'urlAppend.txt'
     try:
         from googlesearch import search
     except ImportError:
         print("No module named 'google' found")
 
-    for j in search(category2, num=200, stop=200, pause=2):
-        #print(j)
+    try:
+        with open(ua,'a+', encoding="utf-8") as fa:
+            fa.write("........" + sk + "........")
+            fa.write('\n')
+    except IOError: \
+            print("Error of writing files")
+
+    for j in search(sk, tld="co.in", num=int(num), stop=int(num), pause=15):
         try:
-            with open(link_file,'a+', encoding="utf-8") as f:
+            with open(u,'a+', encoding="utf-8") as f, open(ua,'a+', encoding="utf-8") as fa:
                 f.write(j)
                 f.write('\n')
+                fa.write(j)
+                fa.write('\n')
         except IOError:
             print("Error of writing files")
 
 
+
 if __name__ == '__main__':
     # TODO: reading of labels from csv file can be added
-    link_file='D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\link.txt'
-    output = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
-    google_search(link_file, "about ballet dance")
-    dl = AsyncDownloader(link_file, "artEnt", "dance", output)
-    asyncio.run(dl.main())
+    dir = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
+    with open('D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\ibm-cat-list.csv','rt')as f:
+        data = csv.reader(f)
+        for row in data:
+            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:"+ row[3])
+            l1 = row[0].title().replace(" ", "")
+            l2 = row[1].title().replace(" ", "")
+            path = dir + l1
+            print(l1)
+            prepare_dir_gen_url(path, row[2], row[3] )
+            link_file = path + '\\url.txt'
+            print("........link file generated.........")
+            #google_search(row[0], row[1], row[2], row[3])
+            #google_search(link_file, "about ballet dance")
+            dl = AsyncDownloader(link_file, l1, l2, path)
+            asyncio.run(dl.main())
+            os.remove(link_file)
+            print("........link file removed.........")
+

@@ -1,3 +1,4 @@
+import time
 import aiohttp
 import asyncio
 from downloader import Downloader
@@ -7,6 +8,7 @@ import ssl
 import csv
 
 PARALLELISM = 50
+NUM_OF_LINKS = 250
 
 class AsyncDownloader:
 
@@ -79,8 +81,8 @@ def prepare_dir_gen_url(path, sk, num):
     else:
         os.makedirs(path)
         print("dir created")
-    u = path + '\\' + 'url.txt'
-    ua=path + '\\' + 'urlAppend.txt'
+    u = path + '/' + 'url.txt'
+    ua=path + '/' + 'urlAppend.txt'
     try:
         from googlesearch import search
     except ImportError:
@@ -107,17 +109,18 @@ def prepare_dir_gen_url(path, sk, num):
 
 if __name__ == '__main__':
     # TODO: reading of labels from csv file can be added
-    dir = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
-    with open('D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\ibm-cat-list.csv','rt')as f:
+    dir = 'output'
+    with open('cats.csv','rt')as f:
         data = csv.reader(f)
         for row in data:
-            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:"+ row[3])
+            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:" + str(NUM_OF_LINKS))
             l1 = row[0].title().replace(" ", "")
             l2 = row[1].title().replace(" ", "")
             path = dir + l1
             print(l1)
-            prepare_dir_gen_url(path, row[2], row[3] )
-            link_file = path + '\\url.txt'
+            prepare_dir_gen_url(path, row[2], NUM_OF_LINKS )
+            time.sleep(600)
+            link_file = path + '/url.txt'
             print("........link file generated.........")
             #google_search(row[0], row[1], row[2], row[3])
             #google_search(link_file, "about ballet dance")

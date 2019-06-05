@@ -9,7 +9,7 @@ import csv
 
 PARALLELISM = 50
 NUM_OF_LINKS = 250
-SLEEP_TIME_IN_SEC = 240 # 4 min 
+SLEEP_TIME_IN_SEC = 320 # 5 min 
 
 class AsyncDownloader:
 

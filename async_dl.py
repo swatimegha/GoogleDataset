@@ -1,3 +1,4 @@
+import time
 import aiohttp
 import asyncio
 from downloader import Downloader
@@ -7,6 +8,8 @@ import ssl
 import csv
 
 PARALLELISM = 50
+NUM_OF_LINKS = 250
+SLEEP_TIME_IN_SEC = 320 # 5 min 
 
 class AsyncDownloader:
 
@@ -70,59 +73,43 @@ class AsyncDownloader:
         except IOError:
             print("Error of writing files")
 
-
-
-
-def prepare_dir_gen_url(path, sk, num):
+def prepare_dir_gen_url(path, subcat, search_key, num):
     if os.path.exists(path):
         print("Path exist")
     else:
         os.makedirs(path)
-        print("dir created")
-    u = path + '\\' + 'url.txt'
-    ua=path + '\\' + 'urlAppend.txt'
+        print("Dir created")
+    sk_path = path + '/' + search_key + '.txt'
+    subcat_path = path + '/' + '_' + subcat + '.txt'
+    cat_path = path + '/' + '_URLS' + '.txt'
     try:
         from googlesearch import search
     except ImportError:
         print("No module named 'google' found")
 
-    try:
-        with open(ua,'a+', encoding="utf-8") as fa:
-            fa.write("........" + sk + "........")
-            fa.write('\n')
-    except IOError: \
-            print("Error of writing files")
-
     for j in search(sk, tld="co.in", num=int(num), stop=int(num), pause=15):
         try:
-            with open(u,'a+', encoding="utf-8") as f, open(ua,'a+', encoding="utf-8") as fa:
-                f.write(j)
-                f.write('\n')
-                fa.write(j)
-                fa.write('\n')
+            with open(sk_path, 'a+', encoding="utf-8") as fsk, open(subcat_path, 'a+', encoding="utf-8") as fsubcat, open(cat_path, 'a+', encoding="utf-8") as fcat:
+                fsk.write(j)
+                fsk.write('\n')
+                fsubcat.write(j)
+                fsubcat.write('\n')
+                fcat.write(j)
+                fcat.write('\n')
         except IOError:
             print("Error of writing files")
 
-
-
 if __name__ == '__main__':
-    # TODO: reading of labels from csv file can be added
-    dir = 'D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\'
-    with open('D:\\MSIT\\2019-2ndSem\\Industrial projects\\Google_Dataset\\ibm-cat-list.csv','rt')as f:
+    out_dir = 'output'
+    with open('cats.csv', 'rt') as f:
         data = csv.reader(f)
         for row in data:
-            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + row[2] + " noOfLinks:"+ row[3])
+            sk = row[2]
+            print("level 1: " + row[0] + " || level 2: " + row[1] + " || search key: " + sk + " noOfLinks:" + str(NUM_OF_LINKS))
             l1 = row[0].title().replace(" ", "")
             l2 = row[1].title().replace(" ", "")
-            path = dir + l1
+            path = out_dir + '/' + l1
             print(l1)
-            prepare_dir_gen_url(path, row[2], row[3] )
-            link_file = path + '\\url.txt'
-            print("........link file generated.........")
-            #google_search(row[0], row[1], row[2], row[3])
-            #google_search(link_file, "about ballet dance")
-            dl = AsyncDownloader(link_file, l1, l2, path)
-            asyncio.run(dl.main())
-            os.remove(link_file)
-            print("........link file removed.........")
+            prepare_dir_gen_url(path, row[1], sk, NUM_OF_LINKS)
+            time.sleep(SLEEP_TIME_IN_SEC)
 
